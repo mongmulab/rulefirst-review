@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rulefirst-review"
+version = "0.1.0"
+description = "규칙 우선(Rule First) 오프라인 코드 리뷰 엔진 — 결정적 규칙 + 초경량 로컬 LLM + 인용 검증"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = []
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.scripts]
+rulefirst = "rulefirst.cli:main"
+
+[tool.setuptools]
+packages = ["rulefirst"]

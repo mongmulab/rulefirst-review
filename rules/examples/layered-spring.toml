@@ -1,0 +1,31 @@
+# 예시 규칙팩 — 계층형 Spring 프로젝트의 명명·의존 규약.
+# 기본으로 켜지지 않는다. 쓰려면 .rulefirst.toml 에 packs = ["core", "examples/layered-spring.toml"]
+
+[[rule]]
+id = "EX-ARC-001"
+kind = "filename"
+perspective = "structure"
+severity = "low"
+title = "controller 패키지의 클래스 이름이 Controller 로 끝나지 않는다"
+files = ["**/controller/**/*.java", "**/web/**/*.java"]
+must_match = '''(Controller|Advice|Handler)\.java$'''
+advice = "역할이 이름에 드러나야 새 인력이 위치를 추론한다."
+
+[[rule]]
+id = "EX-ARC-002"
+kind = "filename"
+perspective = "structure"
+severity = "low"
+title = "service 패키지의 클래스 이름이 Service 로 끝나지 않는다"
+files = ["**/service/**/*.java"]
+must_match = '''(Service|ServiceImpl)\.java$'''
+advice = "도우미 클래스라면 util·support 패키지로 옮긴다."
+
+[[rule]]
+id = "EX-ARC-003"
+perspective = "structure"
+severity = "medium"
+title = "컨트롤러가 매퍼·DAO 를 직접 참조한다 (계층 건너뛰기)"
+files = ["**/*Controller.java"]
+pattern = '''^import\s+[\w.]+\.(mapper|mappers|dao|repository)\.'''
+advice = "서비스 계층을 거치게 한다. 트랜잭션 경계가 서비스에 있다."

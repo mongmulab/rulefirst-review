@@ -1,0 +1,124 @@
+# 보안 규칙 — 설정·코드에 박힌 비밀정보, 주입, 약한 설정
+# 패턴은 줄 단위로 적용된다(multiline=true 인 규칙만 파일 전체).
+
+[[rule]]
+id = "SEC-001"
+perspective = "security"
+severity = "critical"
+title = "설정 파일에 비밀번호·키가 평문으로 들어 있다"
+files = ["*.yml", "*.yaml", "*.properties", "*.env", "*.conf", "*.ini"]
+pattern = '''(?i)^\s*[\w.\-]*(password|passwd|pwd|secret|secret[-_]?key|api[-_]?key|access[-_]?key|private[-_]?key|token)\s*[:=]\s*["']?(?P<val>(?!\$\{|\{\{|<|%|ENC\(|change[-_]?me|changeit|replace[-_]?me|your[-_])[^\s"'#]{4,})'''
+mask_group = "val"
+advice = "환경변수 참조(${ENV_NAME})나 외부 비밀 저장소로 옮긴다. 이미 커밋됐다면 값을 교체한다."
+
+[[rule]]
+id = "SEC-002"
+perspective = "security"
+severity = "high"
+title = "기본값·플레이스홀더 비밀번호가 남아 있다"
+files = ["*.yml", "*.yaml", "*.properties", "*.env", "*.conf", "*.ini", "*.xml"]
+pattern = '''(?i)^\s*[\w.\-]*(password|passwd|pwd|secret|key|token)\s*[:=]\s*["']?(change[-_]?me|changeit|replace[-_]?me|your[-_]?(password|secret|key|token)|admin123|password1?|p@ssw0rd|test1234)\b'''
+advice = "배포 전에 실제 값으로 바꾸거나 기동 시 값이 없으면 멈추게 한다. 잘 알려진 기본값은 사실상 공개값이다."
+
+[[rule]]
+id = "SEC-003"
+perspective = "security"
+severity = "critical"
+title = "개인키가 저장소에 들어 있다"
+pattern = '''-----BEGIN (RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----'''
+advice = "키를 저장소에서 빼고 폐기·재발급한다. 히스토리에도 남으므로 교체가 우선이다."
+
+[[rule]]
+id = "SEC-004"
+perspective = "security"
+severity = "critical"
+title = "접속 URL 안에 비밀번호가 들어 있다"
+pattern = '''(?i)(jdbc:[a-z0-9]+:[^\s"']*[;?&](password|pwd)=(?P<val>[^;&\s"']{3,})|jdbc:oracle:thin:[\w$#]+/(?P<val2>[^@\s"']+)@|[a-z][a-z0-9+.\-]*://[^/\s:@"']+:(?P<val3>[^@\s"'/]{3,})@)'''
+mask_group = "val"
+advice = "URL 에서 자격증명을 빼고 별도 속성·환경변수로 넘긴다."
+
+[[rule]]
+id = "SEC-005"
+perspective = "security"
+severity = "high"
+title = "코드에 자격증명 문자열이 하드코딩돼 있다"
+files = ["*.java", "*.kt", "*.js", "*.ts", "*.py", "*.cs", "*.go"]
+exclude_files = ["**/test/**", "**/tests/**", "**/*Test.java", "**/*.spec.*", "**/*.test.*"]
+pattern = '''(?i)\b(password|passwd|secret|api_?key|access_?token)\s*[:=]\s*["'](?P<val>[^"'\s]{6,})["']'''
+mask_group = "val"
+advice = "설정·환경변수로 옮긴다. 화면 라벨처럼 비밀이 아닌 문자열이면 무시해도 된다."
+
+[[rule]]
+id = "SEC-006"
+perspective = "security"
+severity = "high"
+title = "MyBatis ${} 문자열 치환 — SQL 주입 위험"
+files = ["**/*Mapper.xml", "**/*mapper*.xml", "**/mapper/**/*.xml", "**/mappers/**/*.xml", "**/mybatis/**/*.xml", "**/sqlmap/**/*.xml"]
+# MyBatis Generator 가 만드는 ${criterion.condition} 은 생성된 Criteria 코드가 넣는 고정 문자열이라 제외한다.
+# 같은 생성 코드의 ${orderByClause} 는 호출부가 사용자 입력을 넘길 수 있으므로 계속 잡는다.
+pattern = '''\$\{(?!criterion\.condition\})[^}]+\}'''
+advice = "#{} 바인딩으로 바꾼다. 컬럼명·정렬처럼 바인딩이 안 되는 자리는 서버에서 화이트리스트로 검증한 값만 넣는다."
+
+[[rule]]
+id = "SEC-007"
+perspective = "security"
+severity = "medium"
+title = "SQL 문자열 이어 붙이기 — 주입 위험"
+files = ["*.java", "*.kt", "*.py", "*.js", "*.ts", "*.cs"]
+exclude_files = ["**/test/**", "**/tests/**", "**/*Test.java", "**/*.spec.*", "**/*.test.*"]
+pattern = '''(?i)["']\s*(select|insert|update|delete|merge)\b[^"']*["']\s*\+\s*[A-Za-z_]'''
+advice = "PreparedStatement·바인드 변수로 바꾼다."
+
+[[rule]]
+id = "SEC-008"
+perspective = "security"
+severity = "medium"
+title = "이스케이프 없는 출력 — XSS 위험"
+files = ["*.html", "*.jsp", "*.vue", "*.jsx", "*.tsx", "*.ftl", "*.j2", "*.jinja"]
+pattern = '''(th:utext\s*=|<%=|v-html\s*=|dangerouslySetInnerHTML|\|\s*safe\b|\$\{[^}]*\?no_esc)'''
+advice = "기본 이스케이프 출력(th:text, <c:out>, {{ }})을 쓴다. 꼭 HTML 을 넣어야 하면 서버에서 정제한다."
+
+[[rule]]
+id = "SEC-009"
+perspective = "security"
+severity = "medium"
+title = "CSRF 보호를 끄거나 모든 출처를 허용한다"
+files = ["*.java", "*.kt"]
+pattern = '''(csrf\(\)\.disable\(\)|csrf\(\s*AbstractHttpConfigurer::disable\s*\)|csrf\(\s*\w+\s*->\s*\w+\.disable\(\)\s*\)|@CrossOrigin\(\s*(origins\s*=\s*)?"\*"|allowedOrigins\(\s*"\*"\s*\))'''
+advice = "상태를 바꾸는 요청에는 CSRF 토큰을 유지하고, CORS 는 필요한 출처만 연다."
+
+[[rule]]
+id = "SEC-010"
+perspective = "security"
+severity = "medium"
+title = "약한 해시·암호 알고리즘"
+files = ["*.java", "*.kt"]
+pattern = '''(MessageDigest\.getInstance\(\s*"(MD5|SHA-?1)"\s*\)|Cipher\.getInstance\(\s*"(DES[^"]*|RC4|AES|AES/ECB[^"]*)"\s*\))'''
+advice = "비밀번호는 bcrypt·PBKDF2·Argon2, 암호화는 AES/GCM 을 쓴다. \"AES\" 단독 지정은 ECB 로 동작한다."
+
+[[rule]]
+id = "SEC-011"
+perspective = "security"
+severity = "high"
+title = "TLS 인증서·호스트 검증을 끈다"
+pattern = '''(?i)(TrustAllCerts|NoopHostnameVerifier|ALLOW_ALL_HOSTNAME_VERIFIER|setHostnameVerifier\(\s*\(?[\w\s,]*\)?\s*->\s*true|verify\s*=\s*False|rejectUnauthorized\s*:\s*false|InsecureSkipVerify\s*:\s*true)'''
+advice = "검증을 끄지 말고 사설 인증서는 신뢰 저장소에 등록한다."
+
+[[rule]]
+id = "SEC-012"
+perspective = "security"
+severity = "medium"
+title = "로그에 민감정보를 남긴다"
+files = ["*.java", "*.kt", "*.js", "*.ts", "*.py"]
+pattern = '''(?i)\blog(ger)?\.(trace|debug|info|warn|error)\(.*\b(password|passwd|pwd|secret|token|ssn|resident|jumin|card_?(no|number))\b'''
+advice = "민감값은 로그에서 빼거나 가린다."
+
+[[rule]]
+id = "SEC-013"
+perspective = "security"
+severity = "low"
+title = "설정에서 디버그·SQL 출력이 켜져 있다"
+files = ["*.yml", "*.yaml", "*.properties"]
+exclude_files = ["**/*-local.*", "**/*-dev.*", "**/*-test.*", "**/test/**"]
+pattern = '''(?i)^\s*(debug|trace|show[-_]sql|spring\.jpa\.show-sql|format[-_]sql)\s*[:=]\s*true\b'''
+advice = "운영 프로필에서는 끈다. 로컬·개발 전용 파일이면 무시해도 된다."

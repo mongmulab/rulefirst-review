@@ -1,0 +1,80 @@
+{
+  "name": "rulefirst-review",
+  "displayName": "RuleFirst Review — 오프라인 코드 리뷰",
+  "description": "규칙 우선 오프라인 코드 리뷰. 결정적 규칙 + 선택적 초경량 로컬 LLM + 인용 검증. 코드는 PC 밖으로 나가지 않는다.",
+  "version": "0.1.0",
+  "publisher": "mongmulab",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mongmulab/rulefirst-review"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Other"],
+  "keywords": ["code review", "offline", "local llm", "mybatis", "spring", "korean"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "rulefirst.reviewChanges", "title": "변경분 리뷰", "category": "RuleFirst" },
+      { "command": "rulefirst.reviewFile", "title": "이 파일 리뷰", "category": "RuleFirst" },
+      { "command": "rulefirst.openReport", "title": "마지막 리포트 열기", "category": "RuleFirst" },
+      { "command": "rulefirst.clear", "title": "리뷰 표시 지우기", "category": "RuleFirst" }
+    ],
+    "menus": {
+      "explorer/context": [
+        { "command": "rulefirst.reviewFile", "when": "resourceScheme == file && !explorerResourceIsFolder", "group": "7_rulefirst" }
+      ],
+      "editor/context": [
+        { "command": "rulefirst.reviewFile", "when": "resourceScheme == file", "group": "7_rulefirst" }
+      ]
+    },
+    "configuration": {
+      "title": "RuleFirst Review",
+      "properties": {
+        "rulefirst.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python 3.11 이상 실행 파일 경로."
+        },
+        "rulefirst.enginePath": {
+          "type": "string",
+          "default": "",
+          "description": "엔진 폴더(rulefirst 패키지가 든 폴더). 비우면 확장에 번들된 엔진을 쓴다."
+        },
+        "rulefirst.base": {
+          "type": "string",
+          "default": "HEAD",
+          "description": "비교 기준 리비전. HEAD 는 커밋 전 변경분, origin/main 등을 주면 브랜치 전체 변경분."
+        },
+        "rulefirst.failOn": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"],
+          "default": "high",
+          "description": "이 등급 이상 지적이 있으면 '배포 보류'로 표시한다."
+        },
+        "rulefirst.reportDir": {
+          "type": "string",
+          "default": "",
+          "description": "리포트(.md/.json) 저장 폴더. 비우면 확장 전용 저장소에 둔다."
+        },
+        "rulefirst.llm.endpoint": {
+          "type": "string",
+          "default": "",
+          "description": "로컬 모델의 OpenAI 호환 주소. 예: http://127.0.0.1:8080/v1 (llama-server), http://127.0.0.1:11434/v1 (Ollama). 비우면 모델 층을 끈다."
+        },
+        "rulefirst.llm.model": {
+          "type": "string",
+          "default": "",
+          "description": "엔드포인트에 넘길 모델 이름. 예: qwen2.5-coder:1.5b"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "bundle": "node scripts/bundle-engine.js",
+    "test": "node --test test/findings.test.js",
+    "package": "npm run bundle && npx --yes @vscode/vsce package --no-dependencies"
+  }
+}

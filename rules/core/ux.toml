@@ -1,0 +1,50 @@
+# 사용자(UX) 규칙 — 조용한 실패, 화면 멈춤, 남은 디버그 출력
+
+[[rule]]
+id = "UX-001"
+perspective = "ux"
+severity = "medium"
+title = "빈 catch — 실패가 사용자에게 보이지 않는다"
+files = ["*.java", "*.kt", "*.js", "*.ts", "*.jsx", "*.tsx"]
+multiline = true
+pattern = '''catch\s*(\([^)]*?\b(?!ignored?\b|expected\b|_\b)\w+\s*\))?\s*\{\s*\}'''
+advice = "일부러 무시한다면 변수 이름을 ignored 로 해 의도를 드러낸다. 아니면 최소한 로그를 남기고, 사용자 동작의 결과라면 화면에 실패를 알린다."
+
+[[rule]]
+id = "UX-002"
+perspective = "ux"
+severity = "medium"
+title = "innerHTML 누적 렌더 — 대량 데이터에서 화면이 멈춘다"
+files = ["*.js", "*.ts", "*.html", "*.jsp"]
+pattern = '''\.innerHTML\s*\+='''
+advice = "문자열을 모아 한 번에 넣거나 DocumentFragment·가상 스크롤·페이지 나누기를 쓴다."
+
+[[rule]]
+id = "UX-003"
+perspective = "ux"
+severity = "low"
+title = "브라우저 alert 사용"
+files = ["*.js", "*.ts", "*.html", "*.jsp"]
+exclude_files = ["**/test/**", "**/*.spec.*", "**/*.test.*"]
+pattern = '''(^|[^.\w])alert\s*\('''
+advice = "화면을 막는 alert 대신 공통 알림 컴포넌트를 쓴다. 자동화 테스트도 alert 에서 멈춘다."
+
+[[rule]]
+id = "UX-004"
+perspective = "ux"
+severity = "low"
+title = "console.log 가 남아 있다"
+files = ["*.js", "*.ts", "*.jsx", "*.tsx", "*.vue"]
+exclude_files = ["**/test/**", "**/*.spec.*", "**/*.test.*"]
+pattern = '''\bconsole\.log\s*\('''
+advice = "배포 전에 지우거나 레벨이 있는 로거로 바꾼다."
+
+[[rule]]
+id = "UX-005"
+perspective = "ux"
+severity = "low"
+title = "printStackTrace — 사용자 안내 없이 스택만 출력"
+files = ["*.java", "*.kt"]
+exclude_files = ["**/test/**"]
+pattern = '''\.printStackTrace\s*\(\s*\)'''
+advice = "로거로 남기고, 사용자에게는 행동 가능한 오류 메시지를 준다."

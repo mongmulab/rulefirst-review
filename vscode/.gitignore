@@ -1,0 +1,4 @@
+engine/
+LICENSE
+*.vsix
+node_modules/

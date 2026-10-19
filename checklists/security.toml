@@ -1,0 +1,34 @@
+perspective = "security"
+files = ["*.java", "*.kt", "*.xml", "*.js", "*.ts", "*.py", "*.jsp", "*.html"]
+exclude_files = ["**/test/**", "**/tests/**", "*.spec.*", "*.test.*"]
+system = "너는 보안 체크리스트 판정기다. 주어진 코드 조각만 보고 판정한다. 추측이 필요한 항목은 해당 없음으로 둔다."
+
+[[item]]
+id = "S1"
+severity = "high"
+title = "새 요청 처리부에 권한 확인이 보이지 않는다"
+question = "새로 추가되거나 바뀐 요청 매핑(URL 처리 메서드)에 권한·역할 확인(@PreAuthorize, @Secured, 역할 검사 코드 등)이 전혀 없는가?"
+
+[[item]]
+id = "S2"
+severity = "high"
+title = "사용자 입력이 검증 없이 쿼리·경로·명령에 들어간다"
+question = "요청 파라미터 같은 외부 입력이 검증·이스케이프 없이 SQL, 파일 경로, OS 명령, 리다이렉트 URL 에 그대로 쓰이는가?"
+
+[[item]]
+id = "S3"
+severity = "medium"
+title = "오류 응답에 내부 정보가 노출된다"
+question = "예외 메시지, 스택 트레이스, SQL 문이 사용자 응답(화면·JSON)에 그대로 담기는가?"
+
+[[item]]
+id = "S4"
+severity = "medium"
+title = "파일 업로드·다운로드 경로 검증이 없다"
+question = "업로드 파일명이나 다운로드 경로를 사용자 값으로 만들면서 '..' 차단이나 허용 폴더 확인이 없는가?"
+
+[[item]]
+id = "S5"
+severity = "medium"
+title = "대량 조회·다운로드에 상한이 없다"
+question = "사용자가 조건을 비우면 전체 데이터를 한 번에 읽거나 내려받게 되는 코드인가?"

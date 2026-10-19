@@ -1,0 +1,38 @@
+# 구조·성능 규칙 — 범용. 팀 명명 규약은 rules/examples 를 복사해 만든다.
+
+[[rule]]
+id = "STR-001"
+perspective = "structure"
+severity = "low"
+title = "새로 들어온 TODO·FIXME"
+files = ["*.java", "*.kt", "*.js", "*.ts", "*.py", "*.xml", "*.sql", "*.html", "*.jsp"]
+pattern = '''\b(TODO|FIXME|XXX|HACK)\b'''
+advice = "배포 전에 해소하거나 이슈 번호를 단다."
+
+[[rule]]
+id = "PERF-001"
+perspective = "performance"
+severity = "medium"
+title = "다중 컬럼 IN 서브쿼리 — 실행계획 퇴행 위험"
+files = ["*.xml", "*.sql"]
+multiline = true
+pattern = '''(?i)\(\s*[\w.]+\s*,\s*[\w.]+(\s*,\s*[\w.]+)*\s*\)\s*(NOT\s+)?IN\s*\(\s*SELECT'''
+advice = "대용량 표에서는 EXISTS 상관 서브쿼리나 조인으로 바꾸고 실행계획을 확인한다."
+
+[[rule]]
+id = "PERF-002"
+perspective = "performance"
+severity = "low"
+title = "SELECT * — 필요 없는 컬럼까지 읽는다"
+files = ["*.xml", "*.sql", "*.java", "*.py"]
+pattern = '''(?i)\bselect\s+\*\s+from\b'''
+advice = "필요한 컬럼만 명시한다. 컬럼이 늘면 매핑·성능이 함께 흔들린다."
+
+[[rule]]
+id = "E2E-001"
+kind = "endpoint_coverage"
+perspective = "e2e"
+severity = "low"
+title = "변경된 엔드포인트가 E2E 하니스에 없다"
+files = ["*.java", "*.kt"]
+advice = "하니스에 이 URL 의 성공·실패·권한 없음 시나리오를 추가한다. 하니스 경로는 .rulefirst.toml [e2e] 에서 지정한다."

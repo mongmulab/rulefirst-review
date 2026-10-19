@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+node_modules/
+*.vsix
+vscode/engine/
+vscode/LICENSE
+.rulefirst-reports/

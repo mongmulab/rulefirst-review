@@ -1,0 +1,45 @@
+# 테스트 규칙 — 짝 없는 변경, 단언 없는 테스트, 흔들리는 테스트
+
+[[rule]]
+id = "TST-001"
+kind = "test_counterpart"
+perspective = "test"
+severity = "medium"
+title = "변경된 클래스에 대응하는 테스트 파일이 없다"
+advice = "같은 이름 + Test 접미사의 테스트를 추가한다. 대상 경로·접미사는 .rulefirst.toml [test] 에서 바꾼다."
+
+[[rule]]
+id = "TST-002"
+kind = "junit_no_assert"
+perspective = "test"
+severity = "medium"
+title = "단언(assert·verify)이 없는 테스트"
+files = ["**/src/test/**/*.java", "**/src/test/**/*.kt"]
+advice = "예외만 안 나면 통과하는 테스트다. 결과값·상태를 단언한다."
+
+[[rule]]
+id = "TST-003"
+perspective = "test"
+severity = "medium"
+title = "테스트를 끈다 (@Disabled·@Ignore·skip)"
+files = ["**/test/**", "**/tests/**", "*.spec.*", "*.test.*", "**/*Test.java"]
+pattern = '''^(?!\s*(\*|//|/\*)).*?(@Disabled\b|@Ignore\b|\b(it|describe|test)\.skip\s*\(|\bxit\s*\(|@pytest\.mark\.skip)'''
+advice = "끈 이유와 다시 켤 조건을 주석·이슈로 남긴다."
+
+[[rule]]
+id = "TST-004"
+perspective = "test"
+severity = "high"
+title = "only 가 남아 다른 테스트가 실행되지 않는다"
+files = ["*.spec.*", "*.test.*", "**/test/**/*.js", "**/test/**/*.ts"]
+pattern = '''\b(it|describe|test|context)\.only\s*\(|\bfit\s*\(|\bfdescribe\s*\('''
+advice = "커밋 전에 .only 를 지운다."
+
+[[rule]]
+id = "TST-005"
+perspective = "test"
+severity = "low"
+title = "테스트에서 고정 대기(sleep) — 흔들리는 테스트"
+files = ["**/test/**", "**/tests/**", "*.spec.*", "*.test.*"]
+pattern = '''(Thread\.sleep\s*\(|time\.sleep\s*\(|waitForTimeout\s*\()'''
+advice = "조건 대기(Awaitility, waitFor, 명시적 대기)로 바꾼다."
