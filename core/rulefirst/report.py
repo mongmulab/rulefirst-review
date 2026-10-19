@@ -32,7 +32,8 @@ def _row(f: Finding) -> str:
     src = f"규칙 {f.rule_id}" if f.source == "rule" else f"모델 {f.rule_id}"
     s = f"- [{SEVERITY_KO.get(f.severity, f.severity)}] `{f.file}:{f.line}` — {f.title}"
     if f.snippet:
-        s += f"\n  - 근거: `{f.snippet.replace('`', "'")}`"
+        snippet = f.snippet.replace("`", "'")
+        s += f"\n  - 근거: `{snippet}`"
     if f.advice:
         s += f"\n  - 조치: {f.advice}"
     s += f"\n  - 출처: {src}"
