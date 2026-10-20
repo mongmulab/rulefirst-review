@@ -197,7 +197,7 @@ class TestRuleKinds(RepoCase):
 
 
 class TestFalsePositives(RepoCase):
-    """실제 저장소 시험 운용에서 나온 오탐을 고정한다."""
+    """시험 운용에서 나온 오탐을 고정한다."""
 
     def test_known_false_positives_stay_quiet(self):
         self.write("a.txt", "x\n")
